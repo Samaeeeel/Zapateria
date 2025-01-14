@@ -1,21 +1,23 @@
 const { Pool } = require('pg');
+require('dotenv').config();
 
-// Configuración de conexión
+// Conexión usando la URL completa de la base de datos
 const pool = new Pool({
-  user: 'postgres', // Usuario de PostgreSQL
-  host: 'localhost', // Host de la base de datos
-  database: 'cosedora_calzado', // Nombre de tu base de datos
-  password: 'Ltic24', // Contraseña de PostgreSQL
-  port: 5432, // Puerto predeterminado de PostgreSQL
+  connectionString: process.env.DATABASE_URL,  // Usando la variable de entorno DATABASE_URL
+  ssl: {
+    rejectUnauthorized: false,  // Si es necesario para Railway
+  },
 });
 
-pool.connect((err, client, release) => {
-    if (err) {
-      console.error('Error al conectar a la base de datos:', err.stack);
-    } else {
-      console.log('Conexión exitosa a la base de datos');
-    }
-    release();
-  });
+// Verificar conexión
+async function verifyConnection() {
+  try {
+    const client = await pool.connect();
+    console.log('Conexión exitosa a la base de datos.');
+    client.release();
+  } catch (error) {
+    console.error('Error al conectar a la base de datos:', error);
+  }
+}
 
-module.exports = pool;
+module.exports = { verifyConnection, pool };
