@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facturación</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+
+
+    <style>
+        .btn-confirmar {
+            background-color: #28a745;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-confirmar:hover {
+            background-color: #218838;
+        }
+
+        .btn-cancelar {
+            background-color: #dc3545;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-cancelar:hover {
+            background-color: #c82333;
+        }
+
+        .btn-volver {
+            background-color: #007bff;
+            color: white;
+            font-size: 16px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .btn-volver:hover {
+            background-color: #0056b3;
+        }
+
+        .tarjetas {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+        }
+
+        .tarjetas img {
+            width: 50px;
+            height: auto;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <div class="container mt-5">
+        <div class="card shadow">
+            <div class="card-header bg-dark text-white text-center">
+                <h2>Factura</h2>
+            </div>
+            <div class="card-body">
+                <!-- Cabecera de Factura -->
+                <div class="mb-4">
+                    <h5>Datos del Cliente</h5>
+                    <p><strong>Nombre:</strong> <span id="cliente-nombre"></span></p>
+                    <p><strong>Email:</strong> <span id="cliente-email"></span></p>
+                    <p><strong>Teléfono:</strong> <span id="cliente-telefono"></span></p>
+                </div>
+
+                <!-- Tabla de Detalle de Factura -->
+                <table class="table table-hover">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th>Servicio</th>
+                            <th>Subservicio</th>
+                            <th>Detalles</th>
+                            <th>Precio</th>
+                        </tr>
+                    </thead>
+                    <tbody id="factura-items">
+                        <!-- Aquí se cargarán los datos de la factura -->
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <td colspan="3" class="text-right font-weight-bold">Total:</td>
+                            <td id="factura-total">$0.00</td>
+                        </tr>
+                    </tfoot>
+                </table>
+
+                <!-- Forma de Pago -->
+                <div class="mt-4">
+                    <h5>Forma de Pago</h5>
+                    <div class="tarjetas">
+                        <img src="https://e7.pngegg.com/pngimages/882/375/png-clipart-wikipedia-logo-visa-graphics-credit-card-the-african-grassland-blue-text.png"
+                            alt="Visa">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Mastercard-logo.png"
+                            alt="Mastercard">
+                        <img src="https://cdn.freelogovectors.net/wp-content/uploads/2023/05/american-express-logo-freelogovectors.net_-1.png"
+                            alt="American Express">
+                    </div>
+                    <input type="text" class="form-control" placeholder="Número de Tarjeta" maxlength="16">
+                    <input type="text" class="form-control mt-2" placeholder="Nombre del Titular">
+                    <input type="text" class="form-control mt-2" placeholder="Fecha de Expiración (MM/AA)">
+                    <input type="text" class="form-control mt-2" placeholder="CVV" maxlength="3">
+                </div>
+
+                <!-- Botones -->
+                <div class="text-right mt-4">
+                    <button class="btn-confirmar" onclick="confirmarPago()">Confirmar Compra</button>
+                    <button class="btn-cancelar" onclick="cancelarFactura()">Cancelar Factura</button>
+                    <button class="btn-volver" onclick="volverInicio()">Volver al Inicio</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function cargarFactura() {
+            // Cargar datos del cliente desde localStorage
+            const clienteNombre = localStorage.getItem('userName') || 'Cliente No Identificado';
+            const clienteEmail = localStorage.getItem('email') || 'Sin correo registrado';
+            const clienteTelefono = localStorage.getItem('phone') || 'Sin teléfono registrado';
+
+            document.getElementById('cliente-nombre').textContent = clienteNombre;
+            document.getElementById('cliente-email').textContent = clienteEmail;
+            document.getElementById('cliente-telefono').textContent = clienteTelefono;
+
+            try {
+                const userId = localStorage.getItem("userId");
+                console.log("Usuario ID:", userId);
+
+                const response = await fetch(`http://localhost:5000/obtener-carrito/${userId}`);
+                if (!response.ok) throw new Error("Error al obtener los datos del carrito");
+
+                const items = await response.json();
+                const facturaTable = document.getElementById("factura-items");
+                const facturaTotal = document.getElementById("factura-total");
+                let total = 0;
+
+                facturaTable.innerHTML = ""; // Limpia la tabla antes de agregar los datos
+
+                items.forEach(item => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${item.servicio}</td>
+                        <td>${item.subservicio}</td>
+                        <td>${item.detalles}</td>
+                        <td>$${parseFloat(item.precio || 0).toFixed(2)}</td>
+                    `;
+                    facturaTable.appendChild(row);
+                    total += parseFloat(item.precio || 0);
+                });
+
+                facturaTotal.textContent = `$${total.toFixed(2)}`;
+            } catch (error) {
+                console.error("Error al cargar los datos de la factura:", error);
+            }
+        }
+
+
+        async function confirmarPago() {
+            const facturaId = localStorage.getItem("facturaId");
+            try {
+                const response = await fetch(`http://localhost:5000/confirmar-factura/${facturaId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                if (response.ok) {
+                    alert("¡Compra confirmada! Generando PDF de la factura...");
+                    generarPDF();
+                    window.location.href = "../index.html"; // Redirigir al inicio
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error al confirmar la compra: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error("Error al confirmar la compra:", error);
+            }
+        }
+
+
+        async function cancelarFactura() {
+            const facturaId = localStorage.getItem("facturaId");
+            try {
+                const response = await fetch(`http://localhost:5000/cancelar-factura/${facturaId}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                });
+
+                if (response.ok) {
+                    alert("La factura ha sido cancelada.");
+                    window.location.href = "../index.html"; // Redirigir al inicio
+                } else {
+                    const errorData = await response.json();
+                    alert(`Error al cancelar la factura: ${errorData.message}`);
+                }
+            } catch (error) {
+                console.error("Error al cancelar la factura:", error);
+            }
+        }
+
+
+        function volverInicio() {
+            window.location.href = "../index.html"; // Redirige al inicio en la raíz del proyecto
+        }
+
+        function generarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.setFontSize(18);
+            doc.text("Factura de Compra", 20, 20);
+
+            doc.setFontSize(12);
+            doc.text(`Nombre: ${document.getElementById("cliente-nombre").textContent}`, 20, 40);
+            doc.text(`Email: ${document.getElementById("cliente-email").textContent}`, 20, 50);
+            doc.text(`Teléfono: ${document.getElementById("cliente-telefono").textContent}`, 20, 60);
+
+            let y = 80;
+            const items = document.querySelectorAll("#factura-items tr");
+            items.forEach(item => {
+                const cols = item.querySelectorAll("td");
+                doc.text(`${cols[0].textContent} - ${cols[1].textContent} - ${cols[2].textContent} - $${cols[3].textContent}`, 20, y);
+                y += 10;
+            });
+
+            const total = document.getElementById("factura-total").textContent;
+            doc.text(`Total: ${total}`, 20, y + 10);
+
+            doc.save("Factura.pdf");
+        }
+
+        document.addEventListener("DOMContentLoaded", cargarFactura);
+    </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.6.0/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
