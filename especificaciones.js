@@ -66,7 +66,7 @@ document.getElementById("specifications-form").addEventListener("submit", async 
     };
 
     try {
-        const response = await fetch("https://zapateria-production.up.railway.app/guardar-especificaciones", {
+        const response = await fetch(" zapateria-production.up.railway.app/guardar-especificaciones", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(formData),

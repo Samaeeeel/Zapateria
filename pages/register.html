@@ -78,7 +78,7 @@
             const contrasena = document.getElementById("contrasena").value;
 
             try {
-                const response = await fetch("https://zapateria-production.up.railway.app/registrar-usuario", {
+                const response = await fetch(" zapateria-production.up.railway.app/registrar-usuario", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ nombre, email, telefono, contrasena }),
