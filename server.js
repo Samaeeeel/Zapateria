@@ -1,7 +1,7 @@
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
-const pool = require("./db"); // Importamos la conexión a la base de datos
+//const pool = require("./db"); // Importamos la conexión a la base de datos
 require('dotenv').config();  // Cargar variables del archivo .env
 const { Pool: pool1, } = require('./db');
 
