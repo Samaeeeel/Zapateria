@@ -1,5 +1,5 @@
 const { Pool } = require('pg');
-require('dotenv').config();
+
 
 // Conexión usando la URL completa de la base de datos
 const pool = new Pool({
