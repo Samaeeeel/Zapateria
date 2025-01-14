@@ -328,6 +328,9 @@ app.post("/cancelar-factura/:facturaId", async (req, res) => {
 module.exports = app;
 
 // Iniciar el servidor
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor escuchando en https://zapateria-production.up.railway.app:${PORT}`);
+
+
+const PORTA = process.env.PORT || 3000; // Usa el puerto asignado por Railway o 3000 como fallback.
+app.listen(PORTA, () => {
+    console.log(`Servidor escuchando en el puerto ${PORTA}`);
 });
