@@ -4,7 +4,7 @@ const bodyParser = require("body-parser");
 const pool = require("./db"); // Importamos la conexión a la base de datos
 
 const app = express();
-const PORT = 500;
+const PORT = 5000;
 
 
 // Middleware
