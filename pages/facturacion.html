@@ -143,7 +143,7 @@
                 const userId = localStorage.getItem("userId");
                 console.log("Usuario ID:", userId);
 
-                const response = await fetch(`zapateria-production.up.railway.app/obtener-carrito/${userId}`);
+                const response = await fetch(`https://zapateria-production.up.railway.app/obtener-carrito/${userId}`);
                 if (!response.ok) throw new Error("Error al obtener los datos del carrito");
 
                 const items = await response.json();
@@ -175,7 +175,7 @@
         async function confirmarPago() {
             const facturaId = localStorage.getItem("facturaId");
             try {
-                const response = await fetch(`zapateria-production.up.railway.app/confirmar-factura/${facturaId}`, {
+                const response = await fetch(`https://zapateria-production.up.railway.app/confirmar-factura/${facturaId}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                 });
@@ -197,7 +197,7 @@
         async function cancelarFactura() {
             const facturaId = localStorage.getItem("facturaId");
             try {
-                const response = await fetch(`zapateria-production.up.railway.app/cancelar-factura/${facturaId}`, {
+                const response = await fetch(`https://zapateria-production.up.railway.app/cancelar-factura/${facturaId}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                 });

@@ -329,5 +329,5 @@ module.exports = app;
 
 // Iniciar el servidor
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`Servidor escuchando en http://localhost:${PORT}`);
+    console.log(`Servidor escuchando en https://zapateria-production.up.railway.app:${PORT}`);
 });
