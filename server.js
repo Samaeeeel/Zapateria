@@ -5,7 +5,7 @@ const pool = require("./db"); // Importamos la conexión a la base de datos
 
 const app = express();
 const PORT = 5000;
-
+module.exports = pool;
 
 // Middleware
 app.use(express.json()); // Para procesar datos JSON enviados desde el cliente
@@ -326,6 +326,7 @@ app.post("/cancelar-factura/:facturaId", async (req, res) => {
 
 // Exporta la app para el servidor principal (si es necesario)
 module.exports = app;
+
 
 // Iniciar el servidor
 app.listen(PORT, '0.0.0.0', () => {
