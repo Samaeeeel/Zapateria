@@ -1,9 +1,9 @@
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
-//const pool = require("./db"); // Importamos la conexión a la base de datos
+const { pool } = require("./db"); // Importamos solo la conexión a la base de datos
 require('dotenv').config();  // Cargar variables del archivo .env
-const { Pool: pool1, } = require('./db');
+
 
 
 const app = express();
@@ -22,7 +22,7 @@ app.post('/login', async (req, res) => {
 
     try {
         // Consulta a la base de datos para verificar credenciales
-        const result = await pool1.query(
+        const result = await pool.query(
             'SELECT * FROM usuarios WHERE email = $1 AND contrasena = $2',
             [email, password]
         );
@@ -55,7 +55,7 @@ app.post("/registrar-usuario", async (req, res) => {
     const { nombre, email, telefono, contrasena } = req.body;
 
     try {
-        const result = await pool1.query(
+        const result = await pool.query(
             "INSERT INTO usuarios (nombre, email, telefono, contrasena) VALUES ($1, $2, $3, $4) RETURNING *",
             [nombre, email, telefono, contrasena]
         );
@@ -73,7 +73,7 @@ app.post("/registrar-usuario", async (req, res) => {
 // Endpoint para obtener servicios y subservicios
 app.get("/obtener-servicios-subservicios", async (req, res) => {
     try {
-        const result = await pool1.query(`
+        const result = await pool.query(`
             SELECT 
                 s.id_servicio,
                 s.nombre_servicio,
@@ -101,11 +101,11 @@ app.post("/guardar-especificaciones", async (req, res) => {
 
     try {
         // Obtener IDs de servicio y subservicio
-        const servicioResult = await pool1.query(
+        const servicioResult = await pool.query(
             "SELECT id_servicio FROM servicios WHERE nombre_servicio = $1",
             [service]
         );
-        const subservicioResult = await pool1.query(
+        const subservicioResult = await pool.query(
             "SELECT id_subservicio FROM subservicios WHERE nombre_subservicio = $1",
             [subservice]
         );
@@ -118,14 +118,14 @@ app.post("/guardar-especificaciones", async (req, res) => {
         const idSubservicio = subservicioResult.rows[0].id_subservicio;
 
         // Insertar especificaciones
-        await pool1.query(
+        await pool.query(
             `INSERT INTO especificaciones (id_usuario, id_servicio, id_subservicio, nombre_cliente, email_cliente, telefono_cliente, detalles, fecha_creacion) 
              VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
             [idUsuario, idServicio, idSubservicio, nombre, email, telefono, detalles]
         );
 
         // Insertar en el carrito
-        await pool1.query(
+        await pool.query(
             `INSERT INTO carrito (id_usuario, id_subservicio, cantidad, detalles) 
              VALUES ($1, $2, $3, $4)`,
             [idUsuario, idSubservicio, 1, detalles]
@@ -146,7 +146,7 @@ app.get("/obtener-carrito/:idUsuario", async (req, res) => {
     const { idUsuario } = req.params;
 
     try {
-        const result = await pool1.query(
+        const result = await pool.query(
             `SELECT c.id_carrito, c.cantidad, s.nombre_subservicio AS subservicio, 
                     s.precio, sv.nombre_servicio AS servicio, s.descripcion AS detalles
              FROM carrito c
@@ -166,7 +166,7 @@ app.get("/obtener-carrito/:idUsuario", async (req, res) => {
 app.get("/obtener-seleccion/:idUsuario", async (req, res) => {
     const { idUsuario } = req.params;
     try {
-        const result = await pool1.query(
+        const result = await pool.query(
             `SELECT s.id_servicio, s.nombre_servicio, 
                     ss.id_subservicio, ss.nombre_subservicio
              FROM seleccion_usuario su
@@ -192,7 +192,7 @@ app.delete("/eliminar-item/:id", async (req, res) => {
     const { id } = req.params;
 
     try {
-        await pool1.query("DELETE FROM carrito WHERE id_carrito = $1", [id]);
+        await pool.query("DELETE FROM carrito WHERE id_carrito = $1", [id]);
         res.status(200).json({ message: "Servicio eliminado correctamente" });
     } catch (error) {
         console.error("Error en /eliminar-item:", error);
@@ -211,7 +211,7 @@ app.post("/guardar-contacto", async (req, res) => {
 
     try {
         // Inserción en la tabla contacto
-        const result = await pool1.query(
+        const result = await pool.query(
             "INSERT INTO contacto (nombre, email, mensaje, fecha_envio) VALUES ($1, $2, $3, NOW()) RETURNING *",
             [name, email, details]
         );
@@ -232,7 +232,7 @@ app.post("/procesar-factura/:userId", async (req, res) => {
     const { userId } = req.params;
 
     try {
-        const result = await pool1.query(
+        const result = await pool.query(
             `INSERT INTO facturas (id_usuario, fecha_emision, total, estado)
              VALUES ($1, NOW(), 0, 'pendiente') RETURNING id_factura`,
             [userId]
@@ -248,7 +248,7 @@ app.post("/confirmar-factura/:facturaId", async (req, res) => {
     const { facturaId } = req.params;
 
     try {
-        const carrito = await pool1.query(
+        const carrito = await pool.query(
             `SELECT id_subservicio, cantidad FROM carrito WHERE id_usuario = (
                 SELECT id_usuario FROM facturas WHERE id_factura = $1
              )`,
@@ -262,7 +262,7 @@ app.post("/confirmar-factura/:facturaId", async (req, res) => {
                 throw new Error(`Cantidad inválida para id_subservicio: ${item.id_subservicio}`);
             }
 
-            await pool1.query(
+            await pool.query(
                 `INSERT INTO detalle_facturas (id_factura, id_subservicio, cantidad, precio_unitario)
                  VALUES (
                      $1, 
@@ -277,7 +277,7 @@ app.post("/confirmar-factura/:facturaId", async (req, res) => {
         // Calcular el total
         let total = 0;
         for (const item of carrito.rows) {
-            const precioResult = await pool1.query(
+            const precioResult = await pool.query(
                 `SELECT precio FROM subservicios WHERE id_subservicio = $1`,
                 [item.id_subservicio]
             );
@@ -298,7 +298,7 @@ app.post("/confirmar-factura/:facturaId", async (req, res) => {
         const totalConIva = total + iva;
 
         // Actualizar la factura con el total y el estado
-        await pool1.query(
+        await pool.query(
             `UPDATE facturas SET total = $1, estado = 'pagado' WHERE id_factura = $2`,
             [totalConIva, facturaId]
         );
