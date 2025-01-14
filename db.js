@@ -3,7 +3,7 @@ require('dotenv').config();  // Cargar variables del archivo .env
 
 // Conexión usando la URL completa de la base de datos
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,  // Usando la variable de entorno DATABASE_URL
+  connectionString: "postgresql://postgres:VEyoLInxbimjnBPLGqjscRVrGSciHpVM@monorail.proxy.rlwy.net:51553/railway",  // La URL que proporcionaste
   ssl: {
     rejectUnauthorized: false,  // Si es necesario para Railway
   },
