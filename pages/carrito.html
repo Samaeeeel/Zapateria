@@ -81,7 +81,7 @@
 
         async function cargarCarrito(userId) {
             try {
-                const response = await fetch(` zapateria-production.up.railway.app/obtener-carrito/${userId}`);
+                const response = await fetch(`zapateria-production.up.railway.app/obtener-carrito/${userId}`);
                 if (!response.ok) throw new Error("Error al obtener los datos del carrito");
 
                 const items = await response.json();
@@ -114,7 +114,7 @@
 
         async function eliminarItem(idCarrito) {
             try {
-                const response = await fetch(` zapateria-production.up.railway.app/eliminar-item/${idCarrito}`, {
+                const response = await fetch(`zapateria-production.up.railway.app/eliminar-item/${idCarrito}`, {
                     method: "DELETE",
                 });
 
@@ -138,7 +138,7 @@
             }
 
             try {
-                const response = await fetch(` zapateria-production.up.railway.app/procesar-factura/${userId}`, {
+                const response = await fetch(`zapateria-production.up.railway.app/procesar-factura/${userId}`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                 });
