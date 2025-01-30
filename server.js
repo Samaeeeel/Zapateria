@@ -379,6 +379,27 @@ app.post("/cancelar-factura/:facturaId", async (req, res) => {
     }
 });
 
+app.get("/api/subservicios/:idServicio", async (req, res) => {
+    const { idServicio } = req.params;
+
+    try {
+        const result = await pool.query(`
+            SELECT id_subservicio, nombre_subservicio, descripcion, precio
+            FROM subservicios
+            WHERE id_servicio = $1
+        `, [idServicio]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: "No se encontraron subservicios para este servicio." });
+        }
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error("Error en /api/subservicios/:idServicio:", error);
+        res.status(500).json({ error: "Error al obtener subservicios." });
+    }
+});
+
 
 
 // Exporta la app para el servidor principal (si es necesario)
