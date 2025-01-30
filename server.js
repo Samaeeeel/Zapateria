@@ -215,7 +215,7 @@ app.get("/api/servicios", async (req, res) => {
                     id_servicio: row.id_servicio,
                     nombre_servicio: row.nombre_servicio,
                     descripcion: row.servicio_descripcion,
-                    imagen: `/imagenes/${row.imagen}`, // 🔹 Cambia esto para apuntar correctamente a la carpeta imágenes
+                    imagen: `/${row.imagen}`, // 🔹 Cambia esto para apuntar correctamente a la carpeta imágenes
                     subservicios: []
                 };
             }
