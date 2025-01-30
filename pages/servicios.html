@@ -292,7 +292,7 @@
     <!-- JavaScript para el modal y las imágenes -->
     <!-- JavaScript -->
     <script>
-        document.addEventListener("DOMContentLoaded", () => { cargarServicios(); });
+        document.addEventListener("DOMContentLoaded", cargarServicios);
 
         function cargarServicios() {
             fetch("https://zapateria-production.up.railway.app/api/servicios")
@@ -300,7 +300,6 @@
                 .then(servicios => {
                     const galeria = document.querySelector(".galeria");
                     galeria.innerHTML = "";
-
                     servicios.forEach(servicio => {
                         const servicioCard = document.createElement("div");
                         servicioCard.className = "col-md-4 mb-4";
@@ -321,21 +320,30 @@
                 .catch(error => console.error("Error al cargar servicios:", error));
         }
 
-        let currentServiceId = '';
-
         function abrirModal(idServicio, nombre, descripcion, imagen) {
-            currentServiceId = idServicio;
             document.getElementById("modal").style.display = "flex";
             document.getElementById("modal-desc").textContent = descripcion;
             document.getElementById("main-img").src = imagen;
+            abrirModalSubservice(idServicio);
         }
 
         function cerrarModal() { document.getElementById("modal").style.display = "none"; }
-
-        function abrirModalSubserviceDesdeModal() { cerrarModal(); abrirModalSubservice(currentServiceId); }
-
-        function abrirModalSubservice(servicioId) {
-            document.getElementById("modal-subservice").style.display = "flex";
+        
+        function abrirModalSubservice(idServicio) {
+            fetch(`https://zapateria-production.up.railway.app/api/subservicios/${idServicio}`)
+                .then(response => response.json())
+                .then(subservicios => {
+                    const container = document.getElementById("subservice-options");
+                    container.innerHTML = "";
+                    subservicios.forEach(sub => {
+                        const button = document.createElement("button");
+                        button.className = "btn btn-primary m-2";
+                        button.textContent = `${sub.nombre_subservicio} - $${sub.precio}`;
+                        container.appendChild(button);
+                    });
+                    document.getElementById("modal-subservice").style.display = "flex";
+                })
+                .catch(error => console.error("Error al cargar subservicios:", error));
         }
 
         function cerrarModalSubservice() { document.getElementById("modal-subservice").style.display = "none"; }

@@ -361,6 +361,9 @@ app.post("/confirmar-factura/:facturaId", async (req, res) => {
     }
 });
 
+app.use('/imagenes', express.static(path.join(__dirname, 'imagenes')));
+
+
 app.post("/cancelar-factura/:facturaId", async (req, res) => {
     const { facturaId } = req.params;
 
