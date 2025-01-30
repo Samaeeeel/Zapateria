@@ -292,6 +292,9 @@
     <!-- JavaScript para el modal y las imágenes -->
     <!-- JavaScript -->
     <script>
+        let currentServiceId = "";
+        let currentServiceName = "";
+
         document.addEventListener("DOMContentLoaded", cargarServicios);
 
         function abrirModalSubserviceDesdeModal() {
@@ -312,7 +315,7 @@
                             <div class="card h-100 producto">
                                 <img src="${servicio.imagen}" class="card-img-top imagen"
                                      alt="${servicio.nombre_servicio}"
-                                     onclick="abrirModal('${servicio.id_servicio}', '${servicio.nombre_servicio}', '${servicio.descripcion}', '${servicio.imagen}')">
+                                     onclick="abrirModalSubservice('${servicio.id_servicio}', '${servicio.nombre_servicio}')">
                                 <div class="card-body d-flex flex-column">
                                     <h3 class="card-title">${servicio.nombre_servicio}</h3>
                                     <p class="card-text descripcion">${servicio.descripcion}</p>
@@ -325,24 +328,13 @@
                 .catch(error => console.error("Error al cargar servicios:", error));
         }
 
-        function abrirModal(idServicio, nombre, descripcion, imagen) {
-            currentServiceId = idServicio; // Asegura que la variable se actualiza
-            document.getElementById("modal").style.display = "flex";
-            document.getElementById("modal-desc").textContent = descripcion;
-            document.getElementById("main-img").src = imagen;
-            abrirModalSubservice(idServicio);
-        }
+        
+        function abrirModalSubservice(idServicio, nombreServicio) {
+            currentServiceId = idServicio;
+            currentServiceName = nombreServicio;
 
-        function cerrarModal() { document.getElementById("modal").style.display = "none"; }
-
-        function abrirModalSubservice(idServicio) {
             fetch(`https://zapateria-production.up.railway.app/api/subservicios/${idServicio}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.json();
-                })
+                .then(response => response.json())
                 .then(subservicios => {
                     const container = document.getElementById("subservice-options");
                     container.innerHTML = "";
@@ -356,6 +348,7 @@
                         const button = document.createElement("button");
                         button.className = "btn btn-primary m-2";
                         button.textContent = `${sub.nombre_subservicio} - $${sub.precio}`;
+                        button.onclick = () => guardarEnLocalStorage(sub.id_subservicio, sub.nombre_subservicio);
                         container.appendChild(button);
                     });
 
@@ -364,7 +357,15 @@
                 .catch(error => console.error("Error al cargar subservicios:", error));
         }
 
-        function cerrarModalSubservice() { document.getElementById("modal-subservice").style.display = "none"; }
+        function cerrarModalSubservice() {
+            document.getElementById("modal-subservice").style.display = "none";
+        }
+
+        function guardarEnLocalStorage(idSubservicio, nombreSubservicio) {
+            localStorage.setItem("selectedService", currentServiceName);
+            localStorage.setItem("selectedSubservice", nombreSubservicio);
+            window.location.href = "especificaciones.html";
+        }
     </script>
 </body>
 
