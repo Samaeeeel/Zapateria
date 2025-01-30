@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const bodyParser = require("body-parser");
+const cors = require("cors"); // Para permitir solicitudes desde el frontend
 const { pool } = require("./db"); // Importamos solo la conexión a la base de datos
 require('dotenv').config();  // Cargar variables del archivo .env
 
@@ -11,6 +12,7 @@ const PORT = 5000;
 
 
 // Middleware
+app.use(cors()); // Habilita CORS para comunicación con frontend
 app.use(express.json()); // Para procesar datos JSON enviados desde el cliente
 app.use(bodyParser.json()); // Para analizar el cuerpo de las solicitudes JSON
 app.use(express.static(path.join(__dirname))); // Servir archivos estáticos desde el directorio raíz
@@ -185,6 +187,55 @@ app.get("/obtener-seleccion/:idUsuario", async (req, res) => {
         res.status(500).json({ message: "Error interno del servidor." });
     }
 });
+
+// 🔹 Ruta para obtener servicios con sus subservicios
+app.get("/api/servicios", async (req, res) => {
+    try {
+        const query = `
+            SELECT 
+                s.id_servicio, 
+                s.nombre_servicio, 
+                s.descripcion AS servicio_descripcion, 
+                s.imagen,
+                ss.id_subservicio, 
+                ss.nombre_subservicio, 
+                ss.descripcion AS subservicio_descripcion, 
+                ss.precio
+            FROM servicios s
+            LEFT JOIN subservicios ss ON s.id_servicio = ss.id_servicio
+        `;
+
+        const result = await pool.query(query);
+
+        // Organizar los datos en un formato adecuado para el frontend
+        const serviciosMap = {};
+        result.rows.forEach(row => {
+            if (!serviciosMap[row.id_servicio]) {
+                serviciosMap[row.id_servicio] = {
+                    id_servicio: row.id_servicio,
+                    nombre_servicio: row.nombre_servicio,
+                    descripcion: row.servicio_descripcion,
+                    imagen: row.imagen,
+                    subservicios: []
+                };
+            }
+            if (row.id_subservicio) {
+                serviciosMap[row.id_servicio].subservicios.push({
+                    id_subservicio: row.id_subservicio,
+                    nombre_subservicio: row.nombre_subservicio,
+                    descripcion: row.subservicio_descripcion,
+                    precio: row.precio
+                });
+            }
+        });
+
+        res.json(Object.values(serviciosMap));
+    } catch (error) {
+        console.error("Error en /api/servicios:", error);
+        res.status(500).json({ error: "Error al obtener los servicios y subservicios." });
+    }
+});
+
 
 
 // Ruta para eliminar un servicio del carrito de un usuario

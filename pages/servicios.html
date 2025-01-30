@@ -251,47 +251,10 @@
         <i class="fas fa-shopping-cart"></i>
     </div>
 
-    <!-- Contenedor principal de los servicios -->
-    <section class="container py-5">
+     <!-- Contenedor de servicios -->
+     <section class="container py-5">
         <h2 class="text-center mb-5">Nuestros Servicios</h2>
-        <div class="row galeria">
-            <!-- Tarjeta de servicio 1 -->
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 producto">
-                    <img src="../imagenes/Reparacion.jpg" class="card-img-top imagen" alt="Reparación de calzado"
-                        onclick="abrirModal('Reparación de Calzado', 'Arreglamos todo tipo de calzado, desde suelas desgastadas hasta costuras dañadas.', ['../imagenes/Reparacion.jpg', '../imagenes/Reparacion2.jpg'])">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title">Reparación de Calzado</h3>
-                        <p class="card-text descripcion">Arreglamos todo tipo de calzado, desde suelas desgastadas hasta
-                            costuras dañadas.</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Tarjeta de servicio 2 -->
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 producto">
-                    <img src="../imagenes/Pintado.jpg" class="card-img-top imagen" alt="Pintado de artículos de cuero"
-                        onclick="abrirModal('Pintado de Artículos de Cuero', 'Ofrecemos el servicio especializado de pintado para todo tipo de artículos de cuero.', ['../imagenes/Pintado.jpg', '../imagenes/Pintado2.jpg'])">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title">Pintado de Artículos de Cuero</h3>
-                        <p class="card-text descripcion">Ofrecemos el servicio especializado de pintado para todo tipo
-                            de artículos de cuero.</p>
-                    </div>
-                </div>
-            </div>
-            <!-- Tarjeta de servicio 3 -->
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 producto">
-                    <img src="../imagenes/Mochilas.jpg" class="card-img-top imagen" alt="Reparación de Mochilas"
-                        onclick="abrirModal('Reparación de Mochilas', 'Reparamos mochilas y otros artículos similares, garantizando la durabilidad.', ['../imagenes/Mochilas.jpg', '../imagenes/Mochilas2.jpg'])">
-                    <div class="card-body d-flex flex-column">
-                        <h3 class="card-title">Reparación de Mochilas y Otros Artículos</h3>
-                        <p class="card-text descripcion">Reparamos mochilas y otros artículos similares, garantizando la
-                            durabilidad.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
+        <div class="row galeria"></div>
     </section>
 
     
@@ -327,105 +290,55 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 
     <!-- JavaScript para el modal y las imágenes -->
+    <!-- JavaScript -->
     <script>
+        document.addEventListener("DOMContentLoaded", () => { cargarServicios(); });
 
-        const subservices = {
-            "Reparación de Calzado": [
-                "Cambio de planta o suela",
-                "Cambio de tapas",
-                "Cocidos",
-                "Cambio de cierre a zapatos",
-                "Lustrado",
-                "Pintado de zapatos de tela"
-            ],
-            "Pintado de Artículos de Cuero": [
-                "Pintar chompas de cuero",
-                "Pintar zapatos de cuero",
-                "Pintado de carteras de cuero",
-                "Pintado de cinturones de cuero",
-                "Pintura personalizada"
-            ],
-            "Reparación de Mochilas": [
-                "Arreglo de cierre de mochilas",
-                "Arreglo de mochilas rotas",
-                "Arreglo de riatas",
-                "Cambio de hebillas y broches",
-                "Reforzamiento de costuras"
-            ]
-        };
+        function cargarServicios() {
+            fetch("https://zapateria-production.up.railway.app/api/servicios")
+                .then(response => response.json())
+                .then(servicios => {
+                    const galeria = document.querySelector(".galeria");
+                    galeria.innerHTML = "";
 
-        let currentServiceName = '';
+                    servicios.forEach(servicio => {
+                        const servicioCard = document.createElement("div");
+                        servicioCard.className = "col-md-4 mb-4";
+                        servicioCard.innerHTML = `
+                            <div class="card h-100 producto">
+                                <img src="${servicio.imagen}" class="card-img-top imagen"
+                                     alt="${servicio.nombre_servicio}"
+                                     onclick="abrirModal('${servicio.id_servicio}', '${servicio.nombre_servicio}', '${servicio.descripcion}', '${servicio.imagen}')">
+                                <div class="card-body d-flex flex-column">
+                                    <h3 class="card-title">${servicio.nombre_servicio}</h3>
+                                    <p class="card-text descripcion">${servicio.descripcion}</p>
+                                </div>
+                            </div>
+                        `;
+                        galeria.appendChild(servicioCard);
+                    });
+                })
+                .catch(error => console.error("Error al cargar servicios:", error));
+        }
 
-        function abrirModal(nombreProducto, descripcion, imagenes) {
-            currentServiceName = nombreProducto;
+        let currentServiceId = '';
+
+        function abrirModal(idServicio, nombre, descripcion, imagen) {
+            currentServiceId = idServicio;
             document.getElementById("modal").style.display = "flex";
-            document.getElementById("main-img").src = imagenes[0];
             document.getElementById("modal-desc").textContent = descripcion;
-
-            const contenedorMiniaturas = document.getElementById("modal-img-container");
-            contenedorMiniaturas.innerHTML = '';
-            imagenes.forEach((imgSrc, index) => {
-                const img = document.createElement("img");
-                img.src = imgSrc;
-                img.className = "modal-img" + (index === 0 ? " active" : "");
-                img.onclick = () => seleccionarImagenPrincipal(imgSrc);
-                contenedorMiniaturas.appendChild(img);
-            });
+            document.getElementById("main-img").src = imagen;
         }
 
-        function seleccionarImagenPrincipal(src) {
-            document.getElementById("main-img").src = src;
-            document.querySelectorAll(".modal-img").forEach(img => img.classList.remove("active"));
-            document.querySelector(`.modal-img[src="${src}"]`).classList.add("active");
-        }
+        function cerrarModal() { document.getElementById("modal").style.display = "none"; }
 
-        function cerrarModal() {
-            document.getElementById("modal").style.display = "none";
-        }
+        function abrirModalSubserviceDesdeModal() { cerrarModal(); abrirModalSubservice(currentServiceId); }
 
-        function abrirModalSubserviceDesdeModal() {
-            cerrarModal(); // Cerramos el modal principal
-            abrirModalSubservice(currentServiceName); // Abrimos el modal de subservicios con el servicio actual
-        }
-
-        function redirigirAEspecificaciones(serviceName, subservice) {
-            // Guardar los datos en localStorage
-            localStorage.setItem("selectedService", serviceName);
-            localStorage.setItem("selectedSubservice", subservice);
-
-            // Redirigir a la página de especificaciones
-            window.open("especificaciones.html", "_blank");
-        }
-
-        
-        function abrirModalSubservice(serviceName) {
+        function abrirModalSubservice(servicioId) {
             document.getElementById("modal-subservice").style.display = "flex";
-            document.getElementById("subservice-title").innerText = `Selecciona un subservicio para ${serviceName}`;
-
-            const container = document.getElementById("subservice-options");
-            container.innerHTML = "";
-
-             // Obtiene los subservicios correspondientes al servicio seleccionado
-            const subserviceList = subservices[serviceName] || [];
-
-
-            subserviceList.forEach(subservice => {
-                const button = document.createElement("button");
-                button.innerText = subservice;
-                button.className = "subservice-button";
-                button.onclick = () => {
-                    redirigirAEspecificaciones(serviceName, subservice);
-                    console.log(`Subservicio seleccionado: ${subservice}`);
-                    cerrarModalSubservice();
-                };
-                container.appendChild(button);
-            });
         }
 
-        function cerrarModalSubservice() {
-            document.getElementById("modal-subservice").style.display = "none";
-        }
-
+        function cerrarModalSubservice() { document.getElementById("modal-subservice").style.display = "none"; }
     </script>
 </body>
 
